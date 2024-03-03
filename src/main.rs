@@ -2,8 +2,8 @@ use std::ops::{AddAssign};
 use raylib::ffi::KeyboardKey::{KEY_DOWN, KEY_UP};
 use raylib::prelude::*;
 
-const SCREEN_WIDTH: i32 = 640 * 3;
-const SCREEN_HEIGHT: i32 = 480 * 3;
+const SCREEN_WIDTH: i32 = 800;
+const SCREEN_HEIGHT: i32 = 600;
 
 #[derive(Clone, Copy)]
 struct Ball {
