@@ -1,8 +1,7 @@
-use raylib::ease::back_in;
-use raylib::ffi::powf;
 use raylib::ffi::KeyboardKey::{KEY_DOWN, KEY_UP};
 use raylib::prelude::*;
 use std::ops::AddAssign;
+use std::time::{Duration, Instant};
 
 const SCREEN_WIDTH: i32 = 800;
 const SCREEN_HEIGHT: i32 = 600;
@@ -19,7 +18,7 @@ impl Ball {
     pub fn new() -> Self {
         Ball {
             position: Vector2 { x: 0.0, y: 0.0 },
-            velocity: Vector2 { x: 3.0, y: 1.0 },
+            velocity: Vector2 { x: 5.0, y: 5.0 },
             color: Color::WHITE,
             radius: 10.0,
         }
@@ -58,6 +57,9 @@ struct Score {
 }
 
 fn main() {
+    let cpu_paddle_reaction_time = Duration::from_secs_f64(1.5); // Adjust the reaction time as needed (in seconds)
+    let last_cpu_update_time = Instant::now();
+
     let (mut rl, thread) = init()
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Pong")
@@ -76,6 +78,7 @@ fn main() {
     let mut cpu_paddle: Paddle = Paddle::new();
     cpu_paddle.position.x = SCREEN_WIDTH as f32 - cpu_paddle.size.x * 2.0;
     cpu_paddle.position.y -= cpu_paddle.size.y / 2.0;
+    cpu_paddle.acceleration = 0.4;
 
     rl.set_target_fps(60);
 
@@ -128,24 +131,33 @@ fn main() {
             user_paddle.position.y = 0.0;
         }
 
-        // Draw cpu paddle
-        d.draw_rectangle_v(cpu_paddle.position, cpu_paddle.size, user_paddle.color);
-        let center: Vector2 = Vector2 {
-            x: SCREEN_WIDTH as f32 - cpu_paddle.size.x * 2.0,
-            y: cpu_paddle.position.y + cpu_paddle.size.y / 2.0,
-        };
-        if ball.position.y > center.y {
-            cpu_paddle.velocity.y += cpu_paddle.acceleration;
-        } else {
-            cpu_paddle.velocity.y -= cpu_paddle.acceleration;
-        }
-        cpu_paddle.position.add_assign(cpu_paddle.velocity);
+        let current_time = Instant::now();
+        let elapsed_time = current_time.duration_since(last_cpu_update_time);
+        d.draw_rectangle_v(cpu_paddle.position, cpu_paddle.size, cpu_paddle.color);
+        if elapsed_time >= cpu_paddle_reaction_time {
+            let ball_speed = ball.velocity.length();
+            let paddle_y: f32 = cpu_paddle.position.y + cpu_paddle.size.y / 2.0;
+            let ball_y: f32 = ball.position.y;
+            let dist: f32 = paddle_y - ball_y;
+            if dist.abs() > ball_speed {
+                if dist > 0.0 {
+                    cpu_paddle.velocity.y -= cpu_paddle.acceleration;
+                } else {
+                    cpu_paddle.velocity.y += cpu_paddle.acceleration;
+                }
+            } else {
+                cpu_paddle.velocity.y = 0.0;
+            }
 
-        if cpu_paddle.position.y > SCREEN_HEIGHT as f32 - cpu_paddle.size.y {
-            cpu_paddle.position.y = SCREEN_HEIGHT as f32 - cpu_paddle.size.y;
-        }
-        if cpu_paddle.position.y < 0.0 {
-            cpu_paddle.position.y = 0.0;
+            cpu_paddle.position.add_assign(cpu_paddle.velocity);
+
+            // Clip the CPU paddle on the screen
+            if cpu_paddle.position.y > SCREEN_HEIGHT as f32 - cpu_paddle.size.y {
+                cpu_paddle.position.y = SCREEN_HEIGHT as f32 - cpu_paddle.size.y;
+            }
+            if cpu_paddle.position.y < 0.0 {
+                cpu_paddle.position.y = 0.0;
+            }
         }
 
         // Check score and reset the game
