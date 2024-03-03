@@ -1,7 +1,6 @@
 use raylib::{color::Color, math::Vector2};
 
-#[derive(Clone, Copy)]
-pub(crate) struct Ball {
+pub struct Ball {
     pub position: Vector2,
     pub velocity: Vector2,
     pub color: Color,
