@@ -1,3 +1,5 @@
+use raylib::ease::back_in;
+use raylib::ffi::powf;
 use raylib::ffi::KeyboardKey::{KEY_DOWN, KEY_UP};
 use raylib::prelude::*;
 use std::ops::AddAssign;
@@ -17,7 +19,7 @@ impl Ball {
     pub fn new() -> Self {
         Ball {
             position: Vector2 { x: 0.0, y: 0.0 },
-            velocity: Vector2 { x: 3.0, y: 3.0 },
+            velocity: Vector2 { x: 3.0, y: 1.0 },
             color: Color::WHITE,
             radius: 10.0,
         }
@@ -59,6 +61,7 @@ fn main() {
     let (mut rl, thread) = init()
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Pong")
+        .vsync()
         .build();
 
     let mut score = Score { user: 0, cpu: 0 };
@@ -157,6 +160,26 @@ fn main() {
             ball = Ball::new();
             ball.position.x = (SCREEN_WIDTH / 2) as f32;
             ball.position.y = (SCREEN_HEIGHT / 2) as f32;
+        }
+
+        // Check the paddle collisions
+        let cpu_paddle_rect: Rectangle = Rectangle::new(
+            cpu_paddle.position.x,
+            cpu_paddle.position.y,
+            cpu_paddle.size.x,
+            cpu_paddle.size.y,
+        );
+        if cpu_paddle_rect.check_collision_circle_rec(ball.position, ball.radius) {
+            ball.velocity.x *= -1.0;
+        }
+        let user_paddle_rect: Rectangle = Rectangle::new(
+            user_paddle.position.x,
+            user_paddle.position.y,
+            user_paddle.size.x,
+            user_paddle.size.y,
+        );
+        if user_paddle_rect.check_collision_circle_rec(ball.position, ball.radius) {
+            ball.velocity.x *= -1.0;
         }
 
         // Draw score
