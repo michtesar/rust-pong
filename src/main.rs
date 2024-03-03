@@ -1,6 +1,6 @@
-use std::ops::{AddAssign};
 use raylib::ffi::KeyboardKey::{KEY_DOWN, KEY_UP};
 use raylib::prelude::*;
+use std::ops::AddAssign;
 
 const SCREEN_WIDTH: i32 = 800;
 const SCREEN_HEIGHT: i32 = 600;
@@ -20,7 +20,6 @@ impl Ball {
             velocity: Vector2 { x: 3.0, y: 3.0 },
             color: Color::WHITE,
             radius: 10.0,
-
         }
     }
 }
@@ -36,10 +35,16 @@ struct Paddle {
 impl Paddle {
     pub fn new() -> Self {
         Self {
-            position: Vector2 { x: 10.0, y: (SCREEN_HEIGHT / 2) as f32 },
+            position: Vector2 {
+                x: 10.0,
+                y: (SCREEN_HEIGHT / 2) as f32,
+            },
             velocity: Vector2 { x: 0.0, y: 0.0 },
             color: Color::WHITE,
-            size: Vector2 { x: SCREEN_WIDTH as f32 / 100.0, y: SCREEN_WIDTH as f32 / 10.0 },
+            size: Vector2 {
+                x: SCREEN_WIDTH as f32 / 100.0,
+                y: SCREEN_WIDTH as f32 / 10.0,
+            },
             acceleration: 0.25,
         }
     }
@@ -56,10 +61,7 @@ fn main() {
         .title("Pong")
         .build();
 
-    let mut score = Score {
-        user: 0,
-        cpu: 0,
-    };
+    let mut score = Score { user: 0, cpu: 0 };
 
     let mut ball: Ball = Ball::new();
     ball.position.x = (SCREEN_WIDTH / 2) as f32;
@@ -67,7 +69,6 @@ fn main() {
 
     let mut user_paddle: Paddle = Paddle::new();
     user_paddle.position.y -= user_paddle.size.y / 2.0;
-
 
     let mut cpu_paddle: Paddle = Paddle::new();
     cpu_paddle.position.x = SCREEN_WIDTH as f32 - cpu_paddle.size.x * 2.0;
@@ -81,7 +82,13 @@ fn main() {
         d.clear_background(Color::BLACK);
 
         // Draw playground
-        d.draw_line(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT, Color::WHITE);
+        d.draw_line(
+            SCREEN_WIDTH / 2,
+            0,
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT,
+            Color::WHITE,
+        );
         d.draw_circle_lines(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 100.0, Color::WHITE);
 
         // Draw a ball
